@@ -1,0 +1,299 @@
+{
+  "info": {
+    "name": "Eventos Dami API",
+    "description": "Colección de pruebas para la API de eventos y compras. Ejecutar en orden: Crear evento guarda {{eventoId}} y Comprar entradas guarda {{compraId}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "eventoId",
+      "value": "1"
+    },
+    {
+      "key": "compraId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('servicio UP', () => pm.expect(pm.response.json().status).to.eql('UP'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eventos - Listar",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/eventos",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "eventos"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('responde un arreglo', () => pm.expect(pm.response.json()).to.be.an('array'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eventos - Crear",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Concierto de Rock\",\n  \"fecha\": \"2030-05-20T20:00:00\",\n  \"precio\": 15000.00,\n  \"entradasDisponibles\": 100\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/eventos",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "eventos"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('201 Created', () => pm.response.to.have.status(201));",
+              "pm.test('tiene Location', () => pm.response.to.have.header('Location'));",
+              "pm.test('devuelve nombre y precio', () => {",
+              "  pm.expect(body.nombre).to.eql('Concierto de Rock');",
+              "  pm.expect(body.precio).to.eql(15000);",
+              "});",
+              "pm.collectionVariables.set('eventoId', body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eventos - Obtener por id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/eventos/{{eventoId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "eventos", "{{eventoId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('id coincide', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('eventoId'))));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compras - Comprar 3 entradas",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventoId\": {{eventoId}},\n  \"cantidad\": 3\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/compras",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "compras"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('201 Created', () => pm.response.to.have.status(201));",
+              "pm.test('cantidad correcta', () => pm.expect(body.cantidad).to.eql(3));",
+              "pm.test('precio unitario correcto', () => pm.expect(body.precioUnitario).to.eql(15000));",
+              "pm.test('precio total = unitario * cantidad', () => pm.expect(body.precioTotal).to.eql(45000));",
+              "pm.test('incluye el evento', () => pm.expect(body.evento.nombre).to.eql('Concierto de Rock'));",
+              "pm.collectionVariables.set('compraId', body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compras - Obtener por id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/compras/{{compraId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "compras", "{{compraId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('compra persistida', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('compraId'))));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error - Sin stock (409)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventoId\": {{eventoId}},\n  \"cantidad\": 9999\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/compras",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "compras"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('409 Conflict', () => pm.response.to.have.status(409));",
+              "pm.test('título de error', () => pm.expect(pm.response.json().title).to.eql('Entradas insuficientes'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error - Evento inexistente (404)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventoId\": 999999,\n  \"cantidad\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/compras",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "compras"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+              "pm.test('título de error', () => pm.expect(pm.response.json().title).to.eql('Recurso no encontrado'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error - Datos inválidos (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"\",\n  \"precio\": -1,\n  \"entradasDisponibles\": -5\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/eventos",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "eventos"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+              "pm.test('detalla campos inválidos', () => {",
+              "  const errores = pm.response.json().errores;",
+              "  pm.expect(errores).to.have.property('nombre');",
+              "  pm.expect(errores).to.have.property('precio');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
