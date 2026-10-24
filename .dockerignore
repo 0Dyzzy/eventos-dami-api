@@ -3,3 +3,11 @@ target/
 .zed/
 .DS_Store
 HELP.md
+
+# Secretos: nunca deben viajar dentro de la imagen
+.env
+.env.*
+!.env.example
+*.jks
+*.p12
+*.pem

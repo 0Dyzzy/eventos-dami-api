@@ -26,14 +26,6 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
 
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-
       - name: Add SSH Key
         run: |
           mkdir -p ~/.ssh
@@ -46,5 +38,9 @@ jobs:
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
             docker stop my-app || true && docker rm my-app || true
-            docker run -d --name my-app -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
+            docker run -d --name my-app --restart unless-stopped -p 8080:8080 \
+              -e SPRING_DATASOURCE_URL='${{ vars.RDS_URL }}' \
+              -e SPRING_DATASOURCE_USERNAME='${{ vars.RDS_USER }}' \
+              -e SPRING_DATASOURCE_PASSWORD='${{ secrets.RDS_PASSWORD }}' \
+              ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
           EOF
