@@ -10,7 +10,7 @@ API REST en Spring Boot (Java 21) para publicar eventos y vender entradas.
 | `compras` | `id`, `evento_id`, `cantidad`, `precio_unitario`, `precio_total`, `fecha_compra` |
 
 `compras` guarda el precio unitario y total al momento de la compra, para que un
-cambio posterior en el evento no altere los comprobantes ya emitidos.
+cambio posterior en el evento no altere los comprobantes ya emitidos. 
 
 ## Endpoints
 
