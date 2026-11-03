@@ -11,8 +11,12 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import com.eventosdami.api.error.ArchivoResumenInvalidoException;
 import com.eventosdami.api.error.RecursoNoEncontradoException;
+import com.eventosdami.api.error.ResumenNoEncontradoException;
+import com.eventosdami.api.error.ResumenYaExisteException;
 import com.eventosdami.api.error.StockInsuficienteException;
 
 /**
@@ -31,6 +35,29 @@ public class ApiExceptionHandler {
 	@ExceptionHandler(StockInsuficienteException.class)
 	public ProblemDetail stockInsuficiente(StockInsuficienteException ex) {
 		return problema(HttpStatus.CONFLICT, "Entradas insuficientes", ex.getMessage(), "/errores/stock-insuficiente");
+	}
+
+	@ExceptionHandler(ResumenNoEncontradoException.class)
+	public ProblemDetail resumenNoEncontrado(ResumenNoEncontradoException ex) {
+		return problema(HttpStatus.NOT_FOUND, "Resumen no encontrado", ex.getMessage(),
+				"/errores/resumen-no-encontrado");
+	}
+
+	@ExceptionHandler(ResumenYaExisteException.class)
+	public ProblemDetail resumenYaExiste(ResumenYaExisteException ex) {
+		return problema(HttpStatus.CONFLICT, "El resumen ya existe", ex.getMessage(),
+				"/errores/resumen-ya-existe");
+	}
+
+	@ExceptionHandler(ArchivoResumenInvalidoException.class)
+	public ProblemDetail archivoInvalido(ArchivoResumenInvalidoException ex) {
+		return problema(HttpStatus.BAD_REQUEST, "Archivo inválido", ex.getMessage(), "/errores/archivo-invalido");
+	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ProblemDetail archivoDemasiadoGrande(MaxUploadSizeExceededException ex) {
+		return problema(HttpStatus.PAYLOAD_TOO_LARGE, "Archivo demasiado grande",
+				"El archivo enviado supera el tamaño máximo permitido", "/errores/archivo-demasiado-grande");
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
