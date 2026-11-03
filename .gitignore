@@ -36,3 +36,6 @@ build/
 .env
 *.jks
 *.p12
+
+### Resúmenes guardados en local (app.resumen.almacenamiento=local) ###
+/resumenes/
