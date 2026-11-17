@@ -2,7 +2,7 @@
 
 API REST en Spring Boot (Java 21) para publicar eventos y vender entradas.
 
-## Modelo de datos 
+## Modelo de datos  
 
 | Tabla | Campos |
 | --- | --- |
